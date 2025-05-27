@@ -1,4 +1,4 @@
-
+// Pipelined CPU top level
 `timescale 1ps/1ps
 
 module pipelined (clk, reset);
