@@ -76,14 +76,12 @@ module pipelined (clk, reset);
 	mem mem_stage (.ex_mem_out, .mem_wb_in, .ex_mem_ALU_result, .clk, .reset);
 	
 	
-	
+	//mem_wb pipeline register
 	register_twofiftysix mem_wb (.q(mem_wb_out), .d(mem_wb_in), .reset, .clk, .enable(1'b1));
 	
 	
 	
-	
-	
-	//mem_wb pipeline register
+	// Write Back Stage
 	wb writeback_stage (.mem_wb_out, .WriteData);
     
 
