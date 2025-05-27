@@ -4,33 +4,28 @@
 module pipelined (clk, reset);
    input logic clk, reset;
 	
-	// Forwarding signals
+	
 	logic [1:0] forward_a, forward_b, forward_cbz, forward_br;
-	// flag register values
 	logic [3:0] flag_reg_in, flag_reg_out;
-	// if/id pipeline reg data
+	
 	logic [95:0] if_id_in;
 	logic [95:0] if_id_out;
-	//id/ex pipeline reg data
+	
 	logic [255:0] id_ex_in;
 	logic [255:0] id_ex_out;
-	// ALU signals
+	
 	logic [63:0] ALU_result, ex_mem_ALU_result;
-	// hazard unit output register enable signals
 	logic pc_write_en, if_id_write_en;
-	// ex/mem pipeline reg data
+	
 	logic [255:0] ex_mem_in;
 	logic [255:0] ex_mem_out;
-	// mem/wb pipeline reg data
+	
 	logic [255:0] mem_wb_in;
 	logic [255:0] mem_wb_out;
-	// Data to write to register file
 	logic [63:0] WriteData;
-
-	// PC data
+	
 	logic [63:0] pc;
 	logic [63:0] pc_update;
-	// Various stages of control logic
 	logic [14:0] control_sigs, id_ex_control, ex_mem_control, mem_wb_control;
 	
 	assign id_ex_control = id_ex_out[255:241];
@@ -40,7 +35,11 @@ module pipelined (clk, reset);
     // IF STAGE LOGIC
 	fetch if_stage (.pc_write_en, .pc, .pc_update, .if_id_in, .clk, .reset);
 	
-	register_ninetysix if_id (.d(if_id_in), .q(if_id_out), .enable(if_id_write_en), .reset(reset), .clk);
+	// control hazard detection
+	logic if_id_reset, if_id_flush, b_taken;
+	or #(50) (if_id_reset, reset, if_id_flush);
+	
+	register_ninetysix if_id (.d(if_id_in), .q(if_id_out), .enable(if_id_write_en), .reset(if_id_reset), .clk);
 
 	
 	// Forwarding logic 
@@ -52,14 +51,14 @@ module pipelined (clk, reset);
 		.mem_wb_bl(mem_wb_control[12]));
 	
 	// Hazard Detect
-	hazard hazard_det (.pc_write_en, .if_id_write_en, .mem_memread(ex_mem_control[14]), .if_id_rd(if_id_out[4:0]), .mem_rd(ex_mem_out[4:0]));
-	
-	
+	hazard hazard_det (.pc_write_en, .if_id_write_en, .mem_memread(ex_mem_control[14]), .if_id_rd(if_id_out[4:0]), 
+		.mem_rd(ex_mem_out[4:0]), .if_id_flush, .b_taken, .ex_mem_rd(id_ex_out[4:0]), 
+		.if_id_rm(if_id_out[20:16]), .if_id_rn(if_id_out[9:5]), .ex_memread(id_ex_control[14]));
 	
 	// ID STAGE LOGIC
 	id id_stage(.if_id_out, .pc, .forward_cbz, .forward_br, .WriteData, .ex_mem_ALU_result, .ALU_result, .mem_wb_out, 
 		.flag_reg_in, .flag_reg_out, .id_ex_control, .pc_update, .control_sigs,
-		.clk, .reset, .id_ex_in); 
+		.clk, .reset, .id_ex_in, .b_taken, .if_id_write_en); 
 	
 	
 	register_twofiftysix id_ex (.q(id_ex_out), .d(id_ex_in), .reset, .clk, .enable(1'b1));
@@ -81,12 +80,11 @@ module pipelined (clk, reset);
 	mem mem_stage (.ex_mem_out, .mem_wb_in, .ex_mem_ALU_result, .clk, .reset);
 	
 	
-	//mem_wb pipeline register
+	// mem/wb pipeline register
 	register_twofiftysix mem_wb (.q(mem_wb_out), .d(mem_wb_in), .reset, .clk, .enable(1'b1));
 	
 	
 	
-	// Write Back Stage
 	wb writeback_stage (.mem_wb_out, .WriteData);
     
 
