@@ -4,28 +4,33 @@
 module pipelined (clk, reset);
    input logic clk, reset;
 	
-	
+	// Forwarding signals
 	logic [1:0] forward_a, forward_b, forward_cbz, forward_br;
+	// flag register values
 	logic [3:0] flag_reg_in, flag_reg_out;
-	
+	// if/id pipeline reg data
 	logic [95:0] if_id_in;
 	logic [95:0] if_id_out;
-	
+	//id/ex pipeline reg data
 	logic [255:0] id_ex_in;
 	logic [255:0] id_ex_out;
-	
+	// ALU signals
 	logic [63:0] ALU_result, ex_mem_ALU_result;
+	// hazard unit output register enable signals
 	logic pc_write_en, if_id_write_en;
-	
+	// ex/mem pipeline reg data
 	logic [255:0] ex_mem_in;
 	logic [255:0] ex_mem_out;
-	
+	// mem/wb pipeline reg data
 	logic [255:0] mem_wb_in;
 	logic [255:0] mem_wb_out;
+	// Data to write to register file
 	logic [63:0] WriteData;
-	
+
+	// PC data
 	logic [63:0] pc;
 	logic [63:0] pc_update;
+	// Various stages of control logic
 	logic [14:0] control_sigs, id_ex_control, ex_mem_control, mem_wb_control;
 	
 	assign id_ex_control = id_ex_out[255:241];
