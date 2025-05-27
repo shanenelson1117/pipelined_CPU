@@ -1,5 +1,5 @@
 # pipelined_CPU
-This project is a 5-stage pipelined CPU with forwarding and hazard detection. The CPU is based on the LegV8 ISA, a subset of the ARM ISA.
+This project is a 5-stage pipelined CPU with forwarding and hazard detection. The CPU is based on the LEGv8 ISA, a subset of the ARM ISA.
 
 ## Instructions
 The CPU is capable of running `addi, adds, b, b.lt, br, bl, cbz, ldur, stur, subs`.
