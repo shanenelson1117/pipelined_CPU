@@ -1,5 +1,5 @@
 # pipelined_CPU
-This project is a 5-stage pipelined CPU with forwarding and hazard detection. The CPU is based on the LEGv8 ISA, a subset of the ARM ISA. The CPU does not need delay slots in the compiled programs it runs, and predicts branch not taken. All branch operations have a branch penalty of 1 cycle if the branch is taken. 
+This project is a 5-stage pipelined CPU with forwarding and hazard detection. The CPU is based on the LEGv8 ISA, a subset of the ARM ISA. The CPU does not need delay slots (although they are included in the benchmarks) in the compiled programs it runs, and predicts branch not taken. All branch operations have a branch penalty of 1 cycle if the branch is taken. 
 
 ## Instructions
 The CPU is capable of running `addi, adds, b, b.lt, br, bl, cbz, ldur, stur, subs`.
